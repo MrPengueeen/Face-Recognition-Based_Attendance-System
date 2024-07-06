@@ -30,9 +30,9 @@ def create_course(db: Session, course: schemas.CourseCreate):
 
 def add_students_to_course(db: Session, students: list[schemas.Student], course_id: int):
     db_course = db.query(models.Course).filter(models.Course.id == course_id).first()
-    print(db_course.students)
+    
     if not db_course:
-        raise HTTPException(status_code=404, detail="No course found corresponding to the given course ID")
+        return db_course
     for student in students:
         print(student)
         db_student = db.query(models.Student).filter(models.Student.id==student.id).first()

@@ -48,4 +48,7 @@ async def create_course(course: schemas.CourseCreate, db: Session=Depends(get_db
 async def add_student_to_course(course_id: int, students: Annotated[list[schemas.Student], Body()], db: Session=Depends(get_db)):
     print(students)
     print(course_id)
-    return crud.add_students_to_course(db=db, students=students, course_id=course_id)
+    db_course = crud.add_students_to_course(db=db, students=students, course_id=course_id)
+    if not db_course:
+        raise HTTPException(status_code=404, detail="The given course ID does not correspond to any existing course")
+    return db_course
