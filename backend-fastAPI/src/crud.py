@@ -41,3 +41,13 @@ def add_students_to_course(db: Session, students: list[schemas.Student], course_
     db.commit()
     db.refresh(db_course)
     return db_course
+
+
+# Attendance CRUD Operations
+def get_students_by_course_id(db: Session, course_id: int):
+    db_course = db.query(models.Course).filter(models.Course.id==course_id).first()
+    if not db_course:
+        raise HTTPException(status_code=404, detail="No course found for the given course ID")
+    
+    students = db_course.students
+    return students

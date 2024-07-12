@@ -5,7 +5,12 @@ from database import SessionLocal, engine
 import json
 from typing import Annotated
 
+from deepface.modules import verification as vr
+
 models.Base.metadata.create_all(bind=engine)
+
+threshold = vr.find_threshold('Facenet512', 'euclidean_l2')
+print(threshold)
 
 app = FastAPI()
 
@@ -52,3 +57,14 @@ async def add_student_to_course(course_id: int, students: Annotated[list[schemas
     if not db_course:
         raise HTTPException(status_code=404, detail="The given course ID does not correspond to any existing course")
     return db_course
+
+@app.post("/attendance", response_model=list[schemas.Student])
+async def process_attendance(course_id: int, file: UploadFile=File(...), db: Session = Depends(get_db)):
+
+    save_path = f"./images/attendance.png"
+    with open(save_path, "wb+") as file_object:
+        file_object.write(file.file.read())
+    
+    students = crud.get_students_by_course_id(db=db, course_id=course_id)
+    present_students = face_recognition_utils.process_attendance_from_image(img_path=save_path, students=students)
+    return present_students
