@@ -1,7 +1,8 @@
+import 'dart:async';
+
+import 'package:face_recognition_attendance/features/authentication/views/sign_in_screen.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,6 +12,16 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 10), () {
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const SignInScreen()),
+          (Route<dynamic> route) => false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -38,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 width: width * 0.4,
                 decoration: BoxDecoration(
                   color: Colors.red,
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                  borderRadius: const BorderRadius.all(Radius.circular(20)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),
@@ -88,10 +99,10 @@ class _SplashScreenState extends State<SplashScreen> {
                           // fontWeight: FontWeight.bold,
                           color: UIConstants.colors.secondaryTextGrey),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     SizedBox(
-                      width: width * 0.2,
-                      child: LinearProgressIndicator(),
+                      width: width * 0.3,
+                      child: const LinearProgressIndicator(),
                     ),
                   ],
                 ),
