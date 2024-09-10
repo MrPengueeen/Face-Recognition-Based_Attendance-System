@@ -1,4 +1,5 @@
 import 'package:face_recognition_attendance/features/attendance/views/attendance_screen.dart';
+import 'package:face_recognition_attendance/features/attendance_management/views/attendance_management_screen.dart';
 
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/material.dart';
@@ -114,10 +115,7 @@ class _SidebarScreenState extends State<SidebarScreen> {
                       //   });
                       // }
                       return const Center(
-                        child: Text(
-                          'Attendance Management',
-                          style: TextStyle(fontSize: 40),
-                        ),
+                        child: AttendanceManagementScreen(),
                       );
                     case 2:
                       // if (_controller.extended) {

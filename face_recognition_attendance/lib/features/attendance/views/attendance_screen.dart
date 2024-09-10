@@ -243,15 +243,19 @@ class CourseInformationCard extends StatelessWidget {
           content: const SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                MyAdvancedDropdown(items: [
-                  'Room 112',
-                  'Room 113',
-                  'Room 114',
-                  'Electronics Lab-I',
-                  'Room 212',
-                  'Room 214',
-                  'Computer Lab',
-                ])
+                MyAdvancedDropdown(
+                  items: [
+                    'Room 112',
+                    'Room 113',
+                    'Room 114',
+                    'Electronics Lab-I',
+                    'Room 212',
+                    'Room 214',
+                    'Computer Lab',
+                  ],
+                  labelText: 'Select a classroom',
+                  icon: Icon(Icons.other_houses_outlined),
+                ),
               ],
             ),
           ),
