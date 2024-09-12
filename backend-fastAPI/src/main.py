@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 import models, schemas, crud, face_recognition_utils
 from database import SessionLocal, engine
 import json
+import utils
 from typing import Annotated
 
 from deepface.modules import verification as vr
@@ -20,6 +21,32 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+
+
+@app.post("/register/",  response_model=schemas.Teacher)
+def register_user(user: schemas.TeacherCreate, db: Session = Depends(get_db)):
+    db_user = db.query(models.Teacher).filter(models.Teacher.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    hashed_password = utils.get_password_hash(user.password)
+    db_user = models.Teacher(username=user.username, email=user.email, hashed_password=hashed_password, name=user.name)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.post("/login", response_model=schemas.Teacher)
+def login_user(user: schemas.TeacherLogin, db: Session = Depends(get_db)):
+    print(user.email)
+    print(user.password)
+    db_user = db.query(models.Teacher).filter(models.Teacher.email == user.email).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="No user found with the email")
+    if not utils.verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    return db_user
 
 
 @app.get("/students/", response_model=list[schemas.Student])
@@ -44,6 +71,12 @@ async def create_student(student: schemas.StudentCreate = Depends(), file: Uploa
     print(json.loads(embedding_string))
     
     return crud.create_student(db=db, student=student, face_embedding = embedding_string)
+
+
+@app.get("/courses", response_model=list[schemas.Course])
+async def get_courses_by_teacher(teacher_id: int, db: Session=Depends(get_db)):
+    print(teacher_id)
+    return crud.get_courses_by_teacher(db= db, teacher_id=teacher_id)
 
 @app.post("/courses", response_model=schemas.Course)
 async def create_course(course: schemas.CourseCreate, db: Session=Depends(get_db)):

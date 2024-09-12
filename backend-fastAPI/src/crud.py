@@ -21,8 +21,23 @@ def create_student(db: Session, student: schemas.StudentCreate, face_embedding: 
 
 
 # Course CRUD Operations
+
+def get_courses_by_teacher(db: Session, teacher_id: int):
+    db_courses = db.query(models.Course).filter(models.Course.teacher_id==teacher_id).all()
+    teacher = db.query(models.Teacher).filter(models.Teacher.id==teacher_id).first()
+    for db_course in db_courses:
+        db_course.teacher_name = teacher.name
+    return db_courses
+    # # courses = []
+    # # for db_course in db_courses:
+    # #     course = db_course.__dict__
+    # #     teacher = db.query(models.Teacher).filter(models.Teacher.id==db_course.teacher_id).first()
+    # #     course['teacher_name'] = teacher.name
+    # #     courses.append(course)
+    # # return courses
+    # return db_courses
 def create_course(db: Session, course: schemas.CourseCreate):
-    db_course = models.Course(name=course.name, code=course.code)
+    db_course = models.Course(name=course.name, code=course.code, teacher_id=course.teacher_id, semester=course.semester, session=course.session)
     db.add(db_course)
     db.commit()
     db.refresh(db_course)

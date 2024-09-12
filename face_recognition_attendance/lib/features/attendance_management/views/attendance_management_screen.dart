@@ -1,4 +1,6 @@
 import 'package:face_recognition_attendance/features/attendance/views/utils/shared_widgets.dart';
+import 'package:face_recognition_attendance/features/attendance_management/views/attendance_summary_gridview.dart';
+import 'package:face_recognition_attendance/features/attendance_management/views/attendance_summary_listview.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,8 @@ class _AttendanceManagementScreenState
     extends State<AttendanceManagementScreen> {
   var selectedDate = DateTime.now();
   var day = '';
+  bool isGridView = false;
+  int viewModeIndex = 0;
 
   @override
   void initState() {
@@ -74,6 +78,7 @@ class _AttendanceManagementScreenState
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Attendance Management',
@@ -81,6 +86,9 @@ class _AttendanceManagementScreenState
                   fontSize: 19,
                   color: UIConstants.colors.primaryTextBlack,
                   fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 40,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -118,7 +126,11 @@ class _AttendanceManagementScreenState
                 ),
               ],
             ),
+            const SizedBox(
+              height: 40,
+            ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(
                   child: DateWidget(
@@ -145,8 +157,24 @@ class _AttendanceManagementScreenState
                         _selectDate(context);
                       }),
                 ),
+                const SizedBox(
+                  width: 40,
+                ),
                 Flexible(
                   child: ToggleSwitch(
+                    onToggle: (index) {
+                      if (index == 0) {
+                        setState(() {
+                          viewModeIndex = index!;
+                          isGridView = false;
+                        });
+                      } else {
+                        setState(() {
+                          viewModeIndex = index!;
+                          isGridView = true;
+                        });
+                      }
+                    },
                     borderColor: [UIConstants.colors.background],
                     activeBgColor: [
                       UIConstants.colors.primaryPurple,
@@ -154,7 +182,7 @@ class _AttendanceManagementScreenState
                     ],
                     minWidth: 50.0,
                     minHeight: 30.0,
-                    initialLabelIndex: 1,
+                    initialLabelIndex: viewModeIndex,
                     animate: true,
                     cornerRadius: 10.0,
                     activeFgColor: Colors.white,
@@ -177,6 +205,11 @@ class _AttendanceManagementScreenState
                 )
               ],
             ),
+            const SizedBox(
+              height: 20,
+            ),
+            if (isGridView) AttendanceSummaryGridviewWidget(),
+            if (!isGridView) AttendanceSummaryListViewWidget(),
           ],
         ),
       ),

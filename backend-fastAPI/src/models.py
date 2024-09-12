@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Table, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
+import datetime
 
 
 
@@ -24,21 +25,22 @@ class Course(Base):
     __tablename__ = "courses"
 
     id = Column(Integer, primary_key=True, index=True)
+    teacher_id = Column(Integer, ForeignKey("teachers.id"))
     name = Column(String)
     code = Column(String)
+    created_at = Column(DateTime, default=datetime.datetime.now())
+    semester = Column(String)
+    session = Column(String)
     students = relationship("Student", secondary=student_course, back_populates="courses")
 
-# class StudentClass(Base):
-#     __tablename__ = "studentclasses"
+class Teacher(Base):
+    __tablename__ = "teachers"
 
-#     student_id = Column(Integer, ForeignKey("students.id"))
-#     course_id = Column(Integer, ForeignKey("courses.id"))
-
-# class Teacher(Base):
-#     __tablename__ = "teachers"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String)
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    name = Column(String)
 
 # class TeacherClass(Base):
 #     __tablename__ = "teacherclasses"

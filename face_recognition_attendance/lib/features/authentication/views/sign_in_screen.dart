@@ -1,3 +1,4 @@
+import 'package:face_recognition_attendance/features/authentication/controller/authentication_controller.dart';
 import 'package:face_recognition_attendance/features/authentication/utils/shared_widgets.dart';
 import 'package:face_recognition_attendance/features/dashboard/views/sidebar_screen.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
@@ -13,6 +14,11 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  final TextEditingController _emailCont = TextEditingController();
+  final TextEditingController _passCont = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -38,52 +44,60 @@ class _SignInScreenState extends State<SignInScreen> {
                   fit: BoxFit.fitHeight),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Container(
-                    color: UIConstants.colors.backgroundGrey,
-                    child: Center(
-                      child: Container(
-                        margin: const EdgeInsets.all(20),
-                        padding: const EdgeInsets.all(20),
-                        width: width * 0.3,
-                        height: height * 0.8,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: UIConstants.colors.primaryWhite,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: Image.asset('assets/images/app_logo.png',
-                                  height: 200,
-                                  width: 200,
-                                  fit: BoxFit.fitHeight),
-                            ),
-                            const SizedBox(
-                              height: 30,
-                            ),
-                            Text(
-                              'Welcome back, professor!',
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: UIConstants.colors.primaryTextBlack),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            SimpleTextField(
+                  child: Form(
+                    key: _formKey,
+                    child: Container(
+                      color: UIConstants.colors.backgroundGrey,
+                      child: Center(
+                        child: Container(
+                          margin: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
+                          width: width * 0.3,
+                          height: height * 0.8,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: UIConstants.colors.primaryWhite,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: Image.asset('assets/images/app_logo.png',
+                                    height: 200,
+                                    width: 200,
+                                    fit: BoxFit.fitHeight),
+                              ),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              Text(
+                                'Welcome back, professor!',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: UIConstants.colors.primaryTextBlack),
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              SimpleTextField(
                                 hintText: 'Email',
                                 labelText: 'Email',
                                 prefixIconData: Icons.email_outlined,
                                 floatingLabelBehavior:
                                     FloatingLabelBehavior.always,
                                 textColor: Colors.black,
-                                accentColor: UIConstants.colors.primaryPurple),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            SimpleTextField(
+                                accentColor: UIConstants.colors.primaryPurple,
+                                textEditingController: _emailCont,
+                                validator: (value) {
+                                  if (value.isEmpty) return false;
+                                  return true;
+                                },
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              SimpleTextField(
                                 hintText: 'Password',
                                 labelText: 'Password',
                                 prefixIconData: Icons.password,
@@ -91,35 +105,43 @@ class _SignInScreenState extends State<SignInScreen> {
                                 floatingLabelBehavior:
                                     FloatingLabelBehavior.always,
                                 textColor: Colors.black,
-                                accentColor: UIConstants.colors.primaryPurple),
-                            const SizedBox(
-                              height: 50,
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (context) => SidebarScreen()),
-                                    (Route<dynamic> route) => false);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    UIConstants.colors.primaryPurple,
-                                minimumSize: Size(width * 0.3, 65),
-                                elevation: 5,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
+                                accentColor: UIConstants.colors.primaryPurple,
+                                textEditingController: _passCont,
+                                validator: (value) {
+                                  if (value.isEmpty) return false;
+                                  return true;
+                                },
+                              ),
+                              const SizedBox(
+                                height: 50,
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (isLoading) return;
+                                  onLoginButtonPresed();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      UIConstants.colors.primaryPurple,
+                                  minimumSize: Size(width * 0.3, 65),
+                                  elevation: 5,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
                                 ),
+                                child: isLoading
+                                    ? CircularProgressIndicator()
+                                    : Text(
+                                        'Sign In',
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: UIConstants
+                                                .colors.primaryWhite),
+                                      ),
                               ),
-                              child: Text(
-                                'Sign In',
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: UIConstants.colors.primaryWhite),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -131,5 +153,43 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> onLoginButtonPresed() async {
+    setState(() {
+      isLoading = true;
+    });
+    if (_formKey.currentState!.validate()) {
+      final controller = AuthenticationController();
+
+      try {
+        await controller.login(_emailCont.text, _passCont.text);
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => SidebarScreen()),
+            (Route<dynamic> route) => false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: UIConstants.colors.primaryGreen,
+            duration: const Duration(seconds: 4),
+            content: Text(
+              "Login Successful!",
+              style: TextStyle(
+                  fontSize: 20, color: UIConstants.colors.primaryWhite),
+            )));
+      } catch (error) {
+        print('In screen error');
+        print(error.toString());
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: UIConstants.colors.primaryRed,
+            duration: const Duration(seconds: 4),
+            content: Text(
+              error.toString(),
+              style: TextStyle(
+                  fontSize: 20, color: UIConstants.colors.primaryWhite),
+            )));
+      }
+    }
   }
 }

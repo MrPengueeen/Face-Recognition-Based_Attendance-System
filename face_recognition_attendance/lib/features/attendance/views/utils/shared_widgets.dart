@@ -75,6 +75,7 @@ class DateWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         IconButton(
           icon: Icon(Icons.arrow_back_ios),

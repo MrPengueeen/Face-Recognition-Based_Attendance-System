@@ -1,9 +1,12 @@
+import 'package:face_recognition_attendance/features/attendance/controller/attendance_controller.dart';
+import 'package:face_recognition_attendance/features/attendance/models/course_model.dart';
 import 'package:face_recognition_attendance/features/attendance/views/camera_preview_screen.dart';
 import 'package:face_recognition_attendance/features/attendance/views/utils/shared_widgets.dart';
 import 'package:face_recognition_attendance/features/authentication/utils/shared_widgets.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -13,6 +16,41 @@ class AttendanceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
+  List<CourseModel>? courseList = [];
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCourses();
+  }
+
+  Future<void> _getCourses() async {
+    final controller = AttendanceController();
+    final prefs = await SharedPreferences.getInstance();
+    final teacherId = prefs.getInt('user_id');
+    isLoading = true;
+    try {
+      courseList = await controller.getCoursesByTeacher(teacherId!);
+      setState(() {
+        isLoading = false;
+      });
+    } catch (error) {
+      print(error.toString());
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: UIConstants.colors.primaryRed,
+          duration: const Duration(seconds: 4),
+          content: Text(
+            error.toString(),
+            style:
+                TextStyle(fontSize: 20, color: UIConstants.colors.primaryWhite),
+          )));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,52 +81,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             const SizedBox(
               height: 10,
             ),
-            GridView.count(
-              childAspectRatio: 1.3,
-              mainAxisSpacing: 20,
-              crossAxisSpacing: 0,
-              shrinkWrap: true,
-              crossAxisCount: 3,
-              children: [
-                CourseInformationCard(
-                  courseName: 'Digital Communication',
-                  courseCode: 'EEE-615',
-                  numOfStudents: 56,
-                  semester: '6th',
-                  session: '2018-19',
-                  startDate: DateTime(2023, 2, 23),
-                  teacherName: 'Dr. Md. Fazlul Kader',
-                ),
-                CourseInformationCard(
-                  courseName: 'C Programming and Numerical Analysis',
-                  courseCode: 'EEE-113',
-                  numOfStudents: 64,
-                  semester: '1st',
-                  session: '2022-23',
-                  startDate: DateTime(2023, 2, 17),
-                  teacherName: 'Dr. Md. Fazlul Kader',
-                ),
-                CourseInformationCard(
-                  courseName: 'Computer Networks',
-                  courseCode: 'EEE-517',
-                  numOfStudents: 59,
-                  semester: '5th',
-                  session: '2019-20',
-                  startDate: DateTime(2023, 1, 14),
-                  teacherName: 'Dr. Md. Fazlul Kader',
-                ),
-                CourseInformationCard(
-                  courseName:
-                      'Laboratory on C Programming and Numerical Analysis',
-                  courseCode: 'EEE-114',
-                  numOfStudents: 64,
-                  semester: '1st',
-                  session: '2022-23',
-                  startDate: DateTime(2023, 2, 25),
-                  teacherName: 'Dr. Md. Fazlul Kader',
-                ),
-              ],
-            ),
+            isLoading
+                ? LinearProgressIndicator()
+                : GridView.count(
+                    childAspectRatio: 1.3,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 0,
+                    shrinkWrap: true,
+                    crossAxisCount: 3,
+                    children: [
+                      ...courseList!.map(
+                        (course) => CourseInformationCard(
+                          course: course,
+                        ),
+                      ),
+                    ],
+                  ),
           ],
         ),
       ),
@@ -97,30 +105,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 }
 
 class CourseInformationCard extends StatelessWidget {
-  const CourseInformationCard(
-      {super.key,
-      required this.courseName,
-      required this.numOfStudents,
-      required this.courseCode,
-      required this.startDate,
-      required this.semester,
-      required this.session,
-      required this.teacherName});
+  const CourseInformationCard({super.key, required this.course});
 
-  final String courseName;
-  final int numOfStudents;
-  final String courseCode;
-  final DateTime startDate;
-  final String semester;
-  final String session;
-  final String teacherName;
+  final CourseModel course;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: InkWell(
         onTap: () {
-          _showClassSelectionDialog(context);
+          _showClassSelectionDialog(context, course);
         },
         child: Container(
           padding: const EdgeInsets.all(20),
@@ -137,12 +131,12 @@ class CourseInformationCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                courseName,
+                course.name!,
                 style:
                     const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
               Text(
-                DateFormat('MMMM dd, yyyy').format(startDate),
+                DateFormat('MMMM dd, yyyy').format(course.createdAt!),
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
@@ -161,7 +155,7 @@ class CourseInformationCard extends StatelessWidget {
                 ),
                 child: RichText(
                   text: TextSpan(
-                    text: numOfStudents.toString(),
+                    text: course.students!.length.toString(),
                     style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
@@ -189,7 +183,7 @@ class CourseInformationCard extends StatelessWidget {
                             fontSize: 15),
                       ),
                       Text(
-                        courseCode,
+                        course.code!,
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
@@ -204,7 +198,7 @@ class CourseInformationCard extends StatelessWidget {
                             fontSize: 15),
                       ),
                       Text(
-                        semester,
+                        course.semester!,
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
@@ -219,7 +213,7 @@ class CourseInformationCard extends StatelessWidget {
                             fontSize: 15),
                       ),
                       Text(
-                        session,
+                        course.session!,
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
@@ -234,7 +228,7 @@ class CourseInformationCard extends StatelessWidget {
     );
   }
 
-  void _showClassSelectionDialog(BuildContext context) {
+  void _showClassSelectionDialog(BuildContext context, CourseModel course) {
     showDialog(
       context: context,
       builder: (BuildContext ctx) {
@@ -266,7 +260,9 @@ class CourseInformationCard extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (ctx) => const CameraPreviewScreen()),
+                      builder: (ctx) => CameraPreviewScreen(
+                            course: course,
+                          )),
                 );
               },
             ),
