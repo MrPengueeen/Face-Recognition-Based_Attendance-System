@@ -24,7 +24,7 @@ class HTTPUtil {
     BaseOptions options = BaseOptions(
       baseUrl: AppConstants.BASE_URL,
       connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(minutes: 10),
       headers: {},
       contentType: 'application/json; charset=utf-8',
       responseType: ResponseType.json,
@@ -71,6 +71,8 @@ class HTTPUtil {
     Options requestOptions = options ??
         Options(
           contentType: 'application/json',
+          receiveTimeout: Duration(minutes: 10),
+          sendTimeout: Duration(minutes: 1),
         );
     requestOptions.headers = requestOptions.headers ?? {};
 

@@ -4,4 +4,5 @@ class AppConstants {
   static const LOGIN_URL = "login";
   static const REGISTRATION_URL = "register";
   static const COURSES = "courses";
+  static const ATTENDANCE = "attendance";
 }

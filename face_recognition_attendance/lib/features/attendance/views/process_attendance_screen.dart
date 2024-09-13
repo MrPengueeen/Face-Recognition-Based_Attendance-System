@@ -1,5 +1,9 @@
 import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:face_recognition_attendance/features/attendance/controller/attendance_controller.dart';
+import 'package:face_recognition_attendance/features/attendance/models/course_model.dart';
+import 'package:face_recognition_attendance/features/course_management/models/student_model.dart';
 import 'package:face_recognition_attendance/features/dashboard/views/sidebar_screen.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,7 +12,11 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 class ProcessAttendanceScreen extends StatefulWidget {
-  const ProcessAttendanceScreen({super.key});
+  const ProcessAttendanceScreen(
+      {super.key, required this.course, required this.capturedImage});
+
+  final CourseModel course;
+  final List<int> capturedImage;
 
   @override
   State<ProcessAttendanceScreen> createState() =>
@@ -18,42 +26,36 @@ class ProcessAttendanceScreen extends StatefulWidget {
 class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
   bool dataLoaded = false;
 
-  List<Map<String, dynamic>> studentList = [];
+  List<StudentModel> studentList = [];
   List<Map<String, dynamic>> absentList = [];
 
   @override
   void initState() {
     super.initState();
-    loadData();
+    _processAttendance();
   }
 
-  Future<void> loadData() async {
-    studentList.addAll(List.generate(
-        35,
-        (index) => {
-              'name': 'Student ${Random().nextInt(60)}',
-              'id': Random().nextInt(60) + 19702000
-            }));
+  Future<void> _processAttendance() async {
+    final controller = AttendanceController();
 
-    absentList.addAll(List.generate(
-        7,
-        (index) => {
-              'name': 'Student ${Random().nextInt(60)}',
-              'id': Random().nextInt(60) + 19702000
-            }));
-    Future.delayed(Duration(seconds: 20), () {
+    try {
+      studentList = await controller.processAttendanceFromImage(
+          widget.course, widget.capturedImage);
+
       setState(() {
         dataLoaded = true;
       });
-    });
-
-    // Future.delayed(Duration(seconds: 5), () {
-    //                       studentList.add({
-    //                         'name': 'Student ${Random().nextInt(60)}',
-    //                         'id': Random().nextInt(60) + 19702000
-    //                       });
-    //                       setState(() {});
-    //                     });
+    } catch (error) {
+      print(error.toString());
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: UIConstants.colors.primaryRed,
+          duration: const Duration(seconds: 4),
+          content: Text(
+            error.toString(),
+            style:
+                TextStyle(fontSize: 20, color: UIConstants.colors.primaryWhite),
+          )));
+    }
   }
 
   void _showSubmissionDialog(BuildContext context) {
@@ -134,7 +136,7 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Laboratory on Computer Networks',
+                      widget.course.name!,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: UIConstants.colors.primaryTextBlack,
@@ -166,8 +168,8 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Image.asset(
-                    'assets/images/camera_preview.jpg',
+                  child: Image.memory(
+                    Uint8List.fromList(widget.capturedImage),
                     fit: BoxFit.fill,
                   ),
                 ),
@@ -211,7 +213,7 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
             ),
           ),
           Container(
-            alignment: Alignment.center,
+            alignment: Alignment.topCenter,
             padding: EdgeInsets.all(20),
             margin: EdgeInsets.all(20),
             height: height,
@@ -222,6 +224,7 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
             ),
             child: SingleChildScrollView(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text('Present Students',
                       textAlign: TextAlign.center,
@@ -237,8 +240,8 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
                       var e = studentList[index];
 
                       return StudentCard(
-                          studentName: e['name'],
-                          studentID: e['id'],
+                          studentName: e.name!,
+                          studentID: e.id!,
                           present: true);
                     },
                   ),

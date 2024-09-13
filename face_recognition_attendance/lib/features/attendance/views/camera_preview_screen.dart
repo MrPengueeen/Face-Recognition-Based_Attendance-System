@@ -1,11 +1,21 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:face_recognition_attendance/features/attendance/models/course_model.dart';
 import 'package:face_recognition_attendance/features/attendance/views/process_attendance_screen.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_mjpeg/flutter_mjpeg.dart';
+
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CameraPreviewScreen extends StatefulWidget {
-  const CameraPreviewScreen({super.key});
+  const CameraPreviewScreen({super.key, required this.course});
+
+  final CourseModel course;
 
   @override
   State<CameraPreviewScreen> createState() => _CameraPreviewScreenState();
@@ -13,6 +23,19 @@ class CameraPreviewScreen extends StatefulWidget {
 
 class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
   bool captured = false;
+  List<int> capturedFrame = [];
+  late CaptureMjpegPreprocessor _capturePreProcessor;
+
+  @override
+  void initState() {
+    super.initState();
+    _capturePreProcessor = CaptureMjpegPreprocessor(onFrameCaptured: (frame) {
+      setState(() {
+        capturedFrame = frame!;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -38,7 +61,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Laboratory on Computer Networks',
+                        widget.course.name!,
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: UIConstants.colors.primaryWhite,
@@ -98,10 +121,23 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Image.asset(
-                  'assets/images/camera_preview.jpg',
-                  fit: BoxFit.fill,
-                ),
+                child: capturedFrame.isNotEmpty
+                    ? Image.memory(
+                        Uint8List.fromList(capturedFrame),
+                        fit: BoxFit.fitWidth,
+                      )
+                    : Mjpeg(
+                        isLive: !captured,
+                        preprocessor: captured ? _capturePreProcessor : null,
+                        error: (context, error, stack) {
+                          print(error);
+                          print(stack);
+                          return Text(error.toString(),
+                              style: TextStyle(color: Colors.red));
+                        },
+                        stream:
+                            'http://192.168.0.102:8080/video', //'http://192.168.1.37:8081',
+                      ),
               ),
               const SizedBox(
                 height: 20,
@@ -140,8 +176,10 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (ctx) =>
-                                    const ProcessAttendanceScreen()),
+                                builder: (ctx) => ProcessAttendanceScreen(
+                                      course: widget.course,
+                                      capturedImage: capturedFrame,
+                                    )),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -184,11 +222,49 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                           fontSize: 15, color: UIConstants.colors.primaryWhite),
                     ),
                   ),
-                )
+                ),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+typedef FrameCallback = void Function(List<int>? val);
+const String BOUNDARY_PART =
+    '\r\n\r\n--myboundary\r\nContent-Type: image/jpeg\r\nContent-Length: ';
+const String BOUNDARY_DELTA_TIME = '\r\nDelta-time: 110';
+const String BOUNDARY_END = '\r\n\r\n';
+
+class CaptureMjpegPreprocessor extends MjpegPreprocessor {
+  final FrameCallback onFrameCaptured;
+
+  CaptureMjpegPreprocessor({required this.onFrameCaptured});
+  Future<File> get _localFile async {
+    final path = await getApplicationDocumentsDirectory();
+    print(path);
+    return File('${path.path}/image.mjpg');
+  }
+
+  Future<File> saveFrame(List<int> frame) async {
+    final file = await _localFile;
+
+    // Write the file
+    List<int> head = utf8.encode(
+        "${BOUNDARY_PART}${frame.length}${BOUNDARY_DELTA_TIME}${BOUNDARY_END}");
+    file.writeAsBytes(head, mode: FileMode.append);
+
+    return file.writeAsBytes(frame, mode: FileMode.append, flush: true);
+  }
+
+  @override
+  List<int>? process(List<int> frame) {
+    // _writeToFile(frame)
+    // print(frame);
+
+    onFrameCaptured(frame);
+    // saveFrame(frame);
+    return frame;
   }
 }
