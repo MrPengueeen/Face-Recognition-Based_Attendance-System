@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from fastapi import HTTPException
+import datetime
 
 
 
@@ -66,3 +68,25 @@ def get_students_by_course_id(db: Session, course_id: int):
     
     students = db_course.students
     return students
+
+def submit_attendance(db: Session, course_id:int, students=list[schemas.Student]):
+    db_students = []
+    for student in students:
+        db_student = db.query(models.Student).filter(models.Student.id==student.id).first()
+        db_students.append(db_student)
+    
+    db_attendance = models.Attendance(students=db_students, course_id=course_id)
+    db.add(db_attendance)
+    db.commit()
+    db.refresh(db_attendance)
+    return db_attendance
+
+def get_attendance(db: Session, course_id: int, date: datetime.datetime):
+    db_attendance = db.query(models.Attendance).filter(models.Attendance.course_id==course_id, func.date(models.Attendance.date)==func.date(date)).all()
+   
+    return db_attendance
+
+def get_attendance_by_course(db: Session, course_id: int):
+    db_attendance = db.query(models.Attendance).filter(models.Attendance.course_id==course_id).all()
+   
+    return db_attendance

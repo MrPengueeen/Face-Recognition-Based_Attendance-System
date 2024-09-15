@@ -22,6 +22,7 @@ def process_attendance_from_image(img_path: str, students: list[schemas.Student]
     present_students = []
 
     for face in faces:
+        temp_matches = []
         img = Image.fromarray(face)
         img.save('temp.jpg')
         min = float('inf')
@@ -33,11 +34,30 @@ def process_attendance_from_image(img_path: str, students: list[schemas.Student]
             target = vr.l2_normalize(embedding[0]['embedding'])
             distance = vr.find_euclidean_distance(source, target)
             if distance <= threshold:
+                temp_matches.append({
+                    'student': student,
+                    'distance': distance,
+                })
                 if distance < min:
                     min = distance
                     min_match_student = student
         if not min_match_student:
             continue
+        
+
+        if min_match_student in present_students:
+            temp_min = float('inf')
+            min_match_student = None
+            for match in temp_matches:
+                if match['student'] in present_students:
+                    continue
+                if match['distance'] < min:
+                    min_match_student = match['student']
+                    temp_min = match['distance']
+                    min = temp_min
+        if not min_match_student:
+            continue
+
         end = time.time()
         present_students.append(min_match_student)
         print('Recognised Student: {recognised_student} ({ID})'.format(recognised_student = min_match_student.name, ID=min_match_student.student_id))

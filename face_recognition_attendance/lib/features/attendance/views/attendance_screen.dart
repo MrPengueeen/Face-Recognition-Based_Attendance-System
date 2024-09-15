@@ -234,11 +234,12 @@ class CourseInformationCard extends StatelessWidget {
       builder: (BuildContext ctx) {
         return AlertDialog(
           title: const Text('Select Clasroom'),
-          content: const SingleChildScrollView(
+          content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 MyAdvancedDropdown(
-                  items: [
+                  onChanged: (index) {},
+                  items: const [
                     'Room 112',
                     'Room 113',
                     'Room 114',

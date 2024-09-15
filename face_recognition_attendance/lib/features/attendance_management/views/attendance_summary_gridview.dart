@@ -1,30 +1,42 @@
+import 'package:face_recognition_attendance/features/attendance/models/attendance_model.dart';
+import 'package:face_recognition_attendance/features/attendance/models/course_model.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 
-class AttendanceSummaryGridviewWidget extends StatelessWidget {
-  const AttendanceSummaryGridviewWidget({super.key});
+class AttendanceSummaryGridviewWidget extends StatefulWidget {
+  const AttendanceSummaryGridviewWidget(
+      {super.key, required this.attendance, required this.course});
 
+  final AttendanceModel attendance;
+  final CourseModel course;
+
+  @override
+  State<AttendanceSummaryGridviewWidget> createState() =>
+      _AttendanceSummaryGridviewWidgetState();
+}
+
+class _AttendanceSummaryGridviewWidgetState
+    extends State<AttendanceSummaryGridviewWidget> {
   @override
   Widget build(BuildContext context) {
     return GridView.count(
-      childAspectRatio: 0.9,
+      childAspectRatio: 0.8,
       mainAxisSpacing: 20,
       crossAxisSpacing: 10,
       shrinkWrap: true,
       crossAxisCount: 6,
-      children: [
-        StudentAttendanceCard(
-          name: 'Aonmoy Das',
-          id: 19702037,
-          attendance: true,
-        ),
-        StudentAttendanceCard(
-          name: 'Aonmoy Das',
-          id: 19702037,
-          attendance: false,
-        ),
-      ],
+      children: widget.course.students!
+          .map(
+            (e) => StudentAttendanceCard(
+              name: e.name!,
+              id: e.studentId!,
+              attendance: widget.attendance.students!
+                  .map((student) => student.studentId)
+                  .contains(e.studentId),
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -68,6 +80,9 @@ class StudentAttendanceCard extends StatelessWidget {
           ),
           Text(
             name,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Text(
@@ -76,6 +91,9 @@ class StudentAttendanceCard extends StatelessWidget {
           ),
           const SizedBox(
             height: 20,
+          ),
+          Expanded(
+            child: Container(),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

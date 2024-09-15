@@ -1,28 +1,42 @@
+import 'package:face_recognition_attendance/features/attendance/models/attendance_model.dart';
+import 'package:face_recognition_attendance/features/attendance/models/course_model.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class AttendanceSummaryListViewWidget extends StatelessWidget {
+class AttendanceSummaryListViewWidget extends StatefulWidget {
   AttendanceSummaryListViewWidget({
     super.key,
+    required this.attendance,
+    required this.course,
   });
 
-  final List<Map<String, dynamic>> studentList = [
-    {'name': 'Aonmoy Das', 'id': 19702037, 'attendance': true},
-    {'name': 'Aonmoy Das', 'id': 19702037, 'attendance': false}
-  ];
+  final AttendanceModel attendance;
+  final CourseModel course;
 
+  @override
+  State<AttendanceSummaryListViewWidget> createState() =>
+      _AttendanceSummaryListViewWidgetState();
+}
+
+class _AttendanceSummaryListViewWidgetState
+    extends State<AttendanceSummaryListViewWidget> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       physics: AlwaysScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: studentList.length,
+      itemCount: widget.course.students!.length,
       itemBuilder: (context, index) {
-        var e = studentList[index];
+        var e = widget.course.students![index];
 
         return StudentAttendanceTile(
-            name: e['name'], id: e['id'], attendance: e['attendance']);
+          name: e.name!,
+          id: e.studentId!,
+          attendance: widget.attendance.students!
+              .map((student) => student.studentId)
+              .contains(e.studentId),
+        );
       },
     );
   }

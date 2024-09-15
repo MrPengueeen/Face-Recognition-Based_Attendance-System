@@ -2,15 +2,19 @@ import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+typedef DropDownCallback = void Function(String value);
+
 class MyAdvancedDropdown extends StatefulWidget {
   const MyAdvancedDropdown(
       {super.key,
       required this.items,
       required this.labelText,
-      required this.icon});
+      required this.icon,
+      required this.onChanged});
   final List<String> items;
   final String labelText;
   final Icon icon;
+  final DropDownCallback onChanged;
 
   @override
   _MyAdvancedDropdownState createState() => _MyAdvancedDropdownState();
@@ -22,7 +26,7 @@ class _MyAdvancedDropdownState extends State<MyAdvancedDropdown> {
   @override
   void initState() {
     super.initState();
-    _selectedItem = widget.items[0];
+    _selectedItem = widget.items.isEmpty ? 'Select Course' : widget.items[0];
   }
 
   @override
@@ -31,9 +35,7 @@ class _MyAdvancedDropdownState extends State<MyAdvancedDropdown> {
       child: DropdownButtonFormField<String>(
         value: _selectedItem,
         onChanged: (String? value) {
-          setState(() {
-            _selectedItem = value!;
-          });
+          widget.onChanged(value!);
         },
         decoration: InputDecoration(
           labelText: widget.labelText,

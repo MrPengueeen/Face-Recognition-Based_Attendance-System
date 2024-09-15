@@ -37,6 +37,7 @@ class CourseModel {
         students!.add(new StudentModel.fromJson(v));
       });
     }
+    students!.sort((a, b) => a.studentId!.compareTo(b.studentId!));
   }
 
   Map<String, dynamic> toJson() {

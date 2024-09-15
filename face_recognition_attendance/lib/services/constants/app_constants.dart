@@ -5,4 +5,6 @@ class AppConstants {
   static const REGISTRATION_URL = "register";
   static const COURSES = "courses";
   static const ATTENDANCE = "attendance";
+  static const SUBMIT_ATTENDANCE = "submit_attendance";
+  static const ATTENDANCE_SUMMARY = "attendance/summary";
 }

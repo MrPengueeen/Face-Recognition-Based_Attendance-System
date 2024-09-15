@@ -47,6 +47,9 @@ class Student(StudentBase):
 
     class Config:
         orm_mode = True
+    
+    def __eq__(self, other):
+        return self.id == other.id
 
 
 
@@ -71,3 +74,12 @@ class Course(CourseBase):
 
     class Config:
         orm_mode = True
+
+
+class Attendance(BaseModel):
+    id: int
+    course_id: int
+    topic: str
+    date: datetime
+    students: list[schemas.Student]
+

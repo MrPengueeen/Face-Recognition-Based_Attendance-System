@@ -1,14 +1,10 @@
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:face_recognition_attendance/features/attendance/controller/attendance_controller.dart';
 import 'package:face_recognition_attendance/features/attendance/models/course_model.dart';
 import 'package:face_recognition_attendance/features/course_management/models/student_model.dart';
-import 'package:face_recognition_attendance/features/dashboard/views/sidebar_screen.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 class ProcessAttendanceScreen extends StatefulWidget {
@@ -27,7 +23,7 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
   bool dataLoaded = false;
 
   List<StudentModel> studentList = [];
-  List<Map<String, dynamic>> absentList = [];
+  List<StudentModel> absentList = [];
 
   @override
   void initState() {
@@ -46,7 +42,6 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
         dataLoaded = true;
       });
     } catch (error) {
-      print(error.toString());
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: UIConstants.colors.primaryRed,
           duration: const Duration(seconds: 4),
@@ -80,8 +75,8 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
                           color: UIConstants.colors.secondaryTextGrey)),
                   SizedBox(height: 10),
                   ...absentList.map((e) => StudentCard(
-                      studentName: e['name'],
-                      studentID: e['id'],
+                      studentName: e.name!,
+                      studentID: e.studentId!,
                       present: false))
                 ],
               ),
@@ -90,14 +85,26 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
           actions: <Widget>[
             TextButton(
               child: const Text('Submit Attendance'),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content:
-                        Text("Attendance has been submitted successfully.")));
-                Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                        builder: (context) => const SidebarScreen()),
-                    (Route<dynamic> route) => false);
+              onPressed: () async {
+                try {
+                  final controller = AttendanceController();
+                  final response = await controller.submitAttendance(
+                      widget.course, studentList);
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content:
+                          Text("Attendance has been submitted successfully.")));
+                } catch (error) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: UIConstants.colors.primaryRed,
+                      duration: const Duration(seconds: 4),
+                      content: Text(
+                        error.toString(),
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: UIConstants.colors.primaryWhite),
+                      )));
+                }
               },
             ),
           ],
@@ -180,7 +187,17 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        _showSubmissionDialog(context);
+                        absentList.clear();
+                        widget.course.students!.forEach((student) {
+                          if (!studentList
+                              .map((e) => e.studentId)
+                              .contains(student.studentId)) {
+                            absentList.add(student);
+                          }
+                        });
+                        _showSubmissionDialog(
+                          context,
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -241,7 +258,7 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
 
                       return StudentCard(
                           studentName: e.name!,
-                          studentID: e.id!,
+                          studentID: e.studentId!,
                           present: true);
                     },
                   ),

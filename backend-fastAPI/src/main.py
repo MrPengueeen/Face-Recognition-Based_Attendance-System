@@ -5,6 +5,7 @@ from database import SessionLocal, engine
 import json
 import utils
 from typing import Annotated
+import datetime
 
 from deepface.modules import verification as vr
 
@@ -101,3 +102,15 @@ async def process_attendance(course_id: int, file: UploadFile=File(...), db: Ses
     students = crud.get_students_by_course_id(db=db, course_id=course_id)
     present_students = face_recognition_utils.process_attendance_from_image(img_path=save_path, students=students)
     return present_students
+
+@app.post("/submit_attendance", response_model=schemas.Attendance)
+async def submit_attendance(course_id: int, students: Annotated[list[schemas.Student], Body()], db: Session=Depends(get_db)):
+    return crud.submit_attendance(db=db, course_id=course_id, students = students)
+
+@app.get("/attendance", response_model=list[schemas.Attendance])
+async def getAttendance(course_id: int, date: datetime.datetime, db: Session=Depends(get_db)):
+    return crud.get_attendance(db=db, course_id=course_id, date=date)
+
+@app.get("/attendance/summary", response_model=list[schemas.Attendance])
+async def getAttendanceSummary(course_id: int, db: Session=Depends(get_db)):
+    return crud.get_attendance_by_course(course_id=course_id, db=db)
