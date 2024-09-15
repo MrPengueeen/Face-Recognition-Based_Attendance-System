@@ -45,7 +45,9 @@ dependencies:
   flutter_vlc_player: ^7.4.2
   path_provider: ^2.1.4
   data_table_2: ^2.5.15
-  syncfusion_flutter_datagrid: ^26.2.14
+  syncfusion_flutter_datagrid: 24.2.7
+  file_picker: ^8.1.2
+  syncfusion_flutter_datagrid_export: 24.2.7
 
 dev_dependencies:
   flutter_test:
