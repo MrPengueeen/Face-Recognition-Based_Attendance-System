@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 typedef DropDownCallback = void Function(String value);
+typedef DropDownValidator = String Function(String value);
 
 class MyAdvancedDropdown extends StatefulWidget {
-  const MyAdvancedDropdown(
-      {super.key,
-      required this.items,
-      required this.labelText,
-      required this.icon,
-      required this.onChanged});
+  const MyAdvancedDropdown({
+    super.key,
+    required this.items,
+    required this.labelText,
+    required this.icon,
+    required this.onChanged,
+  });
   final List<String> items;
   final String labelText;
   final Icon icon;
@@ -38,6 +40,8 @@ class _MyAdvancedDropdownState extends State<MyAdvancedDropdown> {
           widget.onChanged(value!);
         },
         decoration: InputDecoration(
+          fillColor: UIConstants.colors.primaryWhite,
+          filled: true,
           labelText: widget.labelText,
           border: OutlineInputBorder(
               borderSide: BorderSide(color: UIConstants.colors.primaryPurple)),

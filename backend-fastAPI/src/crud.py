@@ -39,7 +39,9 @@ def get_courses_by_teacher(db: Session, teacher_id: int):
     # # return courses
     # return db_courses
 def create_course(db: Session, course: schemas.CourseCreate):
+    db_teacher = db.query(models.Teacher).filter(course.teacher_id==models.Teacher.id).first()
     db_course = models.Course(name=course.name, code=course.code, teacher_id=course.teacher_id, semester=course.semester, session=course.session)
+    db_course.teacher_name = db_teacher.name
     db.add(db_course)
     db.commit()
     db.refresh(db_course)

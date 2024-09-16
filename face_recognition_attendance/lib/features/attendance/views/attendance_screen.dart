@@ -54,7 +54,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: UIConstants.colors.primaryBackground,
+      backgroundColor: UIConstants.colors.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

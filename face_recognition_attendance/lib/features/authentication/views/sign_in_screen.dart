@@ -53,7 +53,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           margin: const EdgeInsets.all(20),
                           padding: const EdgeInsets.all(20),
                           width: width * 0.3,
-                          height: height * 0.8,
+                          height: height * 0.81,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             color: UIConstants.colors.primaryWhite,
@@ -156,10 +156,10 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> onLoginButtonPresed() async {
-    setState(() {
-      isLoading = true;
-    });
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
       final controller = AuthenticationController();
 
       try {

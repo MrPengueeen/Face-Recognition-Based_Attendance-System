@@ -188,7 +188,14 @@ class _SimpleTextFieldState extends State<SimpleTextField> {
             ),
             const SizedBox(height: 6),
           ],
-          TextField(
+          TextFormField(
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'This field cannot be empty';
+              } else {
+                return null;
+              }
+            },
             focusNode: focusNode,
             controller: textEditingController,
             autofillHints: widget.autofillHints,
