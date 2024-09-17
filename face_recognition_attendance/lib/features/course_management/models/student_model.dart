@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class StudentModel {
   int? studentId;
   String? name;
@@ -20,5 +22,10 @@ class StudentModel {
     data['session'] = this.session;
     data['id'] = this.id;
     return data;
+  }
+
+  @override
+  String toString() {
+    return json.encode(this);
   }
 }

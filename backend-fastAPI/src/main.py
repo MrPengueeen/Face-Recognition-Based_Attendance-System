@@ -83,11 +83,20 @@ async def get_courses_by_teacher(teacher_id: int, db: Session=Depends(get_db)):
 async def create_course(course: schemas.CourseCreate, db: Session=Depends(get_db)):
     return crud.create_course(db=db, course=course)
 
-@app.post("/courses/student", response_model=schemas.Course)
+@app.post("/courses/student", response_model=schemas.CourseBase)
 async def add_student_to_course(course_id: int, students: Annotated[list[schemas.Student], Body()], db: Session=Depends(get_db)):
     print(students)
     print(course_id)
     db_course = crud.add_students_to_course(db=db, students=students, course_id=course_id)
+    if not db_course:
+        raise HTTPException(status_code=404, detail="The given course ID does not correspond to any existing course")
+    return db_course
+
+@app.post("/courses/student/delete", response_model=schemas.CourseBase)
+async def delete_students_from_course(course_id: int, students: Annotated[list[schemas.Student], Body()], db: Session=Depends(get_db)):
+    print(students)
+    print(course_id)
+    db_course = crud.remove_students_from_course(db=db, students=students, course_id=course_id)
     if not db_course:
         raise HTTPException(status_code=404, detail="The given course ID does not correspond to any existing course")
     return db_course

@@ -8,7 +8,7 @@ import datetime
 import models, schemas
 
 # Student CRUD Operations
-def get_students(db: Session, skip: int=0, limit: int=100):
+def get_students(db: Session, skip: int=0, limit: int=1000):
     return db.query(models.Student).offset(skip).limit(limit).all()
 
 def get_student_by_student_id(db: Session, student_id: int):
@@ -56,6 +56,22 @@ def add_students_to_course(db: Session, students: list[schemas.Student], course_
         print(student)
         db_student = db.query(models.Student).filter(models.Student.id==student.id).first()
         db_course.students.append(db_student)
+    db.add(db_course)
+    db.commit()
+    db.refresh(db_course)
+    return db_course
+
+def remove_students_from_course(db: Session, students: list[schemas.Student], course_id: int):
+    db_course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    
+    if not db_course:
+        return db_course
+    
+    for student in students:
+        db_student = db.query(models.Student).filter(models.Student.id == student.id).first()
+        db_course.students.remove(db_student)
+
+    
     db.add(db_course)
     db.commit()
     db.refresh(db_course)

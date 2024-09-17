@@ -29,4 +29,58 @@ class CourseManagementController {
       return Future.error(error);
     }
   }
+
+  Future removeStudentsFromCourse(
+      CourseModel course, List<StudentModel> students) async {
+    var data =
+        json.encode(students.map((student) => student.toJson()).toList());
+    var queryParameters = {
+      'course_id': course.id,
+    };
+
+    try {
+      final response = await httpUtil.post(AppConstants.COURSES_STUDENT_DELETE,
+          queryParameters: queryParameters, data: data);
+
+      return response;
+    } catch (error) {
+      return Future.error(error);
+    }
+  }
+
+  Future getStudents() async {
+    try {
+      final response = await httpUtil.get(
+        AppConstants.STUDENTS,
+      );
+      List<StudentModel> studentList = [];
+      (response as List).forEach((element) {
+        studentList.add(StudentModel.fromJson(element));
+      });
+      return studentList;
+    } catch (error) {
+      return Future.error(error);
+    }
+  }
+
+  Future addStudentsToCourse(
+      CourseModel course, List<StudentModel> students) async {
+    var queryParameters = {
+      'course_id': course.id,
+    };
+
+    var data =
+        json.encode(students.map((student) => student.toJson()).toList());
+    try {
+      final response = await httpUtil.post(
+        AppConstants.COURSES_STUDENT,
+        queryParameters: queryParameters,
+        data: data,
+      );
+
+      return response;
+    } catch (error) {
+      return Future.error(error);
+    }
+  }
 }
