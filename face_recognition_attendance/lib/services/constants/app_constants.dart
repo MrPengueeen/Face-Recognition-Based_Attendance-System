@@ -2,6 +2,7 @@ class AppConstants {
   static const BASE_URL = "http://127.0.0.1:8000/";
 
   static const LOGIN_URL = "login";
+  static const LOGIN_ADMIN = "login_admin";
   static const REGISTRATION_URL = "register";
   static const COURSES = "courses";
   static const STUDENTS = "students";

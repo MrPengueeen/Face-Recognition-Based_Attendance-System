@@ -1,3 +1,4 @@
+import 'package:face_recognition_attendance/features/admin/views/add_new_student_widget.dart';
 import 'package:face_recognition_attendance/features/attendance/models/course_model.dart';
 import 'package:face_recognition_attendance/features/attendance/views/utils/shared_widgets.dart';
 import 'package:face_recognition_attendance/features/authentication/utils/shared_widgets.dart';
@@ -8,18 +9,19 @@ import 'package:face_recognition_attendance/features/dashboard/views/sidebar_scr
 
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mjpeg/flutter_mjpeg.dart';
 
-class AddStudentToCourseScreen extends StatefulWidget {
-  const AddStudentToCourseScreen({super.key, required this.course});
-
-  final CourseModel course;
+class StudentManagementScreen extends StatefulWidget {
+  const StudentManagementScreen({
+    super.key,
+  });
 
   @override
-  State<AddStudentToCourseScreen> createState() =>
-      _AddStudentToCourseScreenState();
+  State<StudentManagementScreen> createState() =>
+      _StudentManagementScreenState();
 }
 
-class _AddStudentToCourseScreenState extends State<AddStudentToCourseScreen> {
+class _StudentManagementScreenState extends State<StudentManagementScreen> {
   List<StudentModel> students = [];
   List<StudentModel> visibleStudents = [];
   List<StudentModel> selectedStudents = [];
@@ -100,63 +102,9 @@ class _AddStudentToCourseScreenState extends State<AddStudentToCourseScreen> {
       context: context,
       builder: (BuildContext ctx) {
         return AlertDialog(
-          title: const Text('Add students to the course?'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                ...selectedStudents.map(
-                  (student) => StudentSelectionCard(
-                    student: student,
-                    isSelected: true,
-                    onChanged: (value) {},
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () async {
-                try {
-                  final controller = CourseManagementController();
-                  await controller.addStudentsToCourse(
-                      widget.course, selectedStudents);
-                  Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (context) => const SidebarScreen(),
-                      ),
-                      (Route<dynamic> route) => false);
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: UIConstants.colors.primaryGreen,
-                      duration: const Duration(seconds: 4),
-                      content: Text(
-                        'The selected students have been added.',
-                        style: TextStyle(
-                            fontSize: 20,
-                            color: UIConstants.colors.primaryWhite),
-                      ),
-                    ),
-                  );
-                } catch (error) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: UIConstants.colors.primaryRed,
-                      duration: const Duration(seconds: 4),
-                      content: Text(
-                        error.toString(),
-                        style: TextStyle(
-                            fontSize: 20,
-                            color: UIConstants.colors.primaryWhite),
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
+          title: const Text('Add new student'),
+          content: AddNewStudentWidget(sessionList: sessionList),
+          actions: <Widget>[],
         );
       },
     );
@@ -165,12 +113,6 @@ class _AddStudentToCourseScreenState extends State<AddStudentToCourseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: UIConstants.colors.primaryWhite,
-        ),
-        backgroundColor: UIConstants.colors.primaryPurple,
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -223,42 +165,41 @@ class _AddStudentToCourseScreenState extends State<AddStudentToCourseScreen> {
                       fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
-                if (selectedStudents.isNotEmpty)
-                  Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          _showAddStudentsDialog(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: UIConstants.colors.primaryPurple,
-                          minimumSize: const Size(200, 60),
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.add,
-                              color: UIConstants.colors.primaryWhite,
-                            ),
-                            const SizedBox(
-                              width: 20,
-                            ),
-                            Text(
-                              'Add selected (${selectedStudents.length}) students',
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  color: UIConstants.colors.primaryWhite),
-                            ),
-                          ],
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _showAddStudentsDialog(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: UIConstants.colors.primaryPurple,
+                        minimumSize: const Size(200, 60),
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add,
+                            color: UIConstants.colors.primaryWhite,
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Text(
+                            'Add new student',
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: UIConstants.colors.primaryWhite),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
             const SizedBox(
@@ -272,7 +213,6 @@ class _AddStudentToCourseScreenState extends State<AddStudentToCourseScreen> {
                   .map(
                     (e) => AddStudentSelectionCard(
                       student: e,
-                      course: widget.course,
                       isSelected: selectedStudents
                           .map((selectedStudent) => selectedStudent.studentId)
                           .contains(e.studentId),
@@ -300,16 +240,15 @@ class _AddStudentToCourseScreenState extends State<AddStudentToCourseScreen> {
 }
 
 class AddStudentSelectionCard extends StatelessWidget {
-  const AddStudentSelectionCard(
-      {super.key,
-      required this.student,
-      required this.isSelected,
-      required this.onChanged,
-      required this.course});
+  const AddStudentSelectionCard({
+    super.key,
+    required this.student,
+    required this.isSelected,
+    required this.onChanged,
+  });
   final StudentModel student;
   final bool isSelected;
   final StudentSelectionCallback onChanged;
-  final CourseModel course;
 
   @override
   Widget build(BuildContext context) {
@@ -347,24 +286,17 @@ class AddStudentSelectionCard extends StatelessWidget {
               ],
             ),
           ),
-          course.students!.map((e) => e.studentId).contains(student.studentId)
-              ? Text(
-                  'Added',
-                  textAlign: TextAlign.end,
-                  style: TextStyle(color: UIConstants.colors.primaryRed),
-                )
-              : Checkbox(
-                  checkColor: UIConstants.colors.primaryGreen,
-                  fillColor:
-                      WidgetStatePropertyAll(UIConstants.colors.primaryWhite),
-                  shape: const CircleBorder(
-                    eccentricity: 1.0,
-                  ),
-                  value: isSelected,
-                  onChanged: (value) {
-                    onChanged(value!);
-                  },
-                )
+          Checkbox(
+            checkColor: UIConstants.colors.primaryGreen,
+            fillColor: WidgetStatePropertyAll(UIConstants.colors.primaryWhite),
+            shape: const CircleBorder(
+              eccentricity: 1.0,
+            ),
+            value: isSelected,
+            onChanged: (value) {
+              onChanged(value!);
+            },
+          )
         ],
       ),
     );

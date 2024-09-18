@@ -91,7 +91,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                 )
               : SingleChildScrollView(
                   padding: EdgeInsets.all(20),
-                  physics: const NeverScrollableScrollPhysics(),
+                  // physics: const NeverScrollableScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

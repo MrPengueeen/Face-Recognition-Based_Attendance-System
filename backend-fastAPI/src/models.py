@@ -46,6 +46,7 @@ class Teacher(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     name = Column(String)
+    user_type = Column(String, default="master")
 
 
 class Attendance(Base):

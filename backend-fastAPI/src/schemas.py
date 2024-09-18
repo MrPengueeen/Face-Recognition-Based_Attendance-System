@@ -12,6 +12,9 @@ class TeacherBase(BaseModel):
 
 class TeacherCreate(TeacherBase):
     password: str
+    user_type: str
+    username: str
+    name: str
 
 class Teacher(TeacherBase):
     id: int
@@ -23,6 +26,7 @@ class Teacher(TeacherBase):
 
 class TeacherLogin(TeacherBase):
     password: str
+    user_type: str
 
 
 # Student schemas

@@ -1,5 +1,6 @@
 import 'package:face_recognition_attendance/features/authentication/controller/authentication_controller.dart';
 import 'package:face_recognition_attendance/features/authentication/utils/shared_widgets.dart';
+import 'package:face_recognition_attendance/features/dashboard/views/admin_sidebar_screen.dart';
 import 'package:face_recognition_attendance/features/dashboard/views/sidebar_screen.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,6 +19,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passCont = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
+  bool isAdmin = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           margin: const EdgeInsets.all(20),
                           padding: const EdgeInsets.all(20),
                           width: width * 0.3,
-                          height: height * 0.81,
+                          height: height * 0.84,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             color: UIConstants.colors.primaryWhite,
@@ -112,8 +114,24 @@ class _SignInScreenState extends State<SignInScreen> {
                                   return true;
                                 },
                               ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Checkbox(
+                                      value: isAdmin,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          isAdmin = value!;
+                                        });
+                                      }),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  const Text('Login as admin'),
+                                ],
+                              ),
                               const SizedBox(
-                                height: 50,
+                                height: 30,
                               ),
                               ElevatedButton(
                                 onPressed: () {
@@ -130,7 +148,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                                 child: isLoading
-                                    ? CircularProgressIndicator()
+                                    ? const CircularProgressIndicator()
                                     : Text(
                                         'Sign In',
                                         style: TextStyle(
@@ -163,10 +181,20 @@ class _SignInScreenState extends State<SignInScreen> {
       final controller = AuthenticationController();
 
       try {
-        await controller.login(_emailCont.text, _passCont.text);
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => SidebarScreen()),
-            (Route<dynamic> route) => false);
+        if (isAdmin) {
+          await controller.loginAsAdmin(
+              _emailCont.text, _passCont.text, 'admin');
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (context) => const AdminSidebarScreen()),
+              (Route<dynamic> route) => false);
+        } else {
+          await controller.login(_emailCont.text, _passCont.text, 'teacher');
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const SidebarScreen()),
+              (Route<dynamic> route) => false);
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             backgroundColor: UIConstants.colors.primaryGreen,
             duration: const Duration(seconds: 4),

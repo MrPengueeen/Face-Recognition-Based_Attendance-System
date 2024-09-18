@@ -32,7 +32,7 @@ def register_user(user: schemas.TeacherCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     hashed_password = utils.get_password_hash(user.password)
-    db_user = models.Teacher(username=user.username, email=user.email, hashed_password=hashed_password, name=user.name)
+    db_user = models.Teacher(username=user.username, email=user.email, hashed_password=hashed_password, name=user.name, user_type=user.user_type)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -47,6 +47,23 @@ def login_user(user: schemas.TeacherLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No user found with the email")
     if not utils.verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    if (db_user.user_type != "teacher") and (db_user.user_type != "master"):
+        raise HTTPException(status_code=401, detail="User is not a teacher")
+    return db_user
+
+@app.post("/login_admin", response_model=schemas.Teacher)
+def login_user(user: schemas.TeacherLogin, db: Session = Depends(get_db)):
+    print(user.email)
+    print(user.password)
+    db_user = db.query(models.Teacher).filter(models.Teacher.email == user.email).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="No user found with the email")
+    if not utils.verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if (db_user.user_type != "master") and (db_user.user_type != "admin"):
+        raise HTTPException(status_code=401, detail="User does not have administrative access.")
+
     return db_user
 
 
@@ -55,7 +72,7 @@ async def get_students(skip: int=0, limit: int=100, db: Session = Depends(get_db
     return crud.get_students(db=db, skip=skip, limit=limit)
 
 
-@app.post("/students/", response_model=schemas.Student)
+@app.post("/students", response_model=schemas.Student)
 async def create_student(student: schemas.StudentCreate = Depends(), file: UploadFile = File(...),  db: Session = Depends(get_db)):
     db_student = crud.get_student_by_student_id(db=db, student_id=student.student_id)
     if db_student:

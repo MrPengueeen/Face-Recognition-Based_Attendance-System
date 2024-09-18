@@ -67,6 +67,7 @@ class HTTPUtil {
   }) async {
     path = AppConstants.BASE_URL + path;
     print('path: $path');
+    print("Query Params: $queryParameters");
     print("Request Body: $data");
     Options requestOptions = options ??
         Options(
