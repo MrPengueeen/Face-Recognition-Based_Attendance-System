@@ -67,7 +67,7 @@ def login_user(user: schemas.TeacherLogin, db: Session = Depends(get_db)):
     return db_user
 
 
-@app.get("/students/", response_model=list[schemas.Student])
+@app.get("/students", response_model=list[schemas.Student])
 async def get_students(skip: int=0, limit: int=100, db: Session = Depends(get_db)):
     return crud.get_students(db=db, skip=skip, limit=limit)
 
