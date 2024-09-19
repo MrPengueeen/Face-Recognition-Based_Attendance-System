@@ -225,12 +225,55 @@ class _CourseManagementScreenState extends State<CourseManagementScreen> {
                   )
                 : courseList.isEmpty
                     ? Center(
-                        child: Text(
-                          'Oops!\n No courses found. Please add a new course.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: UIConstants.colors.secondaryTextGrey,
-                              fontSize: 20),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Oops!\n No courses found. Please add a new course.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: UIConstants.colors.secondaryTextGrey,
+                                  fontSize: 20),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            SizedBox(
+                              width: 220,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  _showAddNewCourseDialog(context);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      UIConstants.colors.primaryPurple,
+                                  minimumSize: Size(width * 0.1, 60),
+                                  elevation: 5,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add,
+                                      color: UIConstants.colors.primaryWhite,
+                                    ),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    Text(
+                                      'Add New Course',
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          color:
+                                              UIConstants.colors.primaryWhite),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       )
                     : Row(
