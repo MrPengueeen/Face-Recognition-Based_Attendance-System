@@ -118,7 +118,7 @@ async def delete_students_from_course(course_id: int, students: Annotated[list[s
         raise HTTPException(status_code=404, detail="The given course ID does not correspond to any existing course")
     return db_course
 
-@app.post("/attendance", response_model=list[schemas.Student])
+@app.post("/attendance", response_model=list[schemas.StudentAttendance])
 async def process_attendance(course_id: int, file: UploadFile=File(...), db: Session = Depends(get_db)):
 
     save_path = f"./images/attendance.png"

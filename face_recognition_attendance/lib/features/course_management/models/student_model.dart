@@ -5,14 +5,16 @@ class StudentModel {
   String? name;
   String? session;
   int? id;
+  List<int>? face = [];
 
-  StudentModel({this.studentId, this.name, this.session, this.id});
+  StudentModel({this.studentId, this.name, this.session, this.id, this.face});
 
   StudentModel.fromJson(Map<String, dynamic> json) {
     studentId = json['student_id'];
     name = json['name'];
     session = json['session'];
     id = json['id'];
+    face = json['face'].cast<int>() ?? [];
   }
 
   Map<String, dynamic> toJson() {

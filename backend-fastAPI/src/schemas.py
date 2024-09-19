@@ -55,7 +55,8 @@ class Student(StudentBase):
     def __eq__(self, other):
         return self.id == other.id
 
-
+class StudentAttendance(Student):
+    face: list[int]
 
 # Course Schema
 class CourseBase(BaseModel):

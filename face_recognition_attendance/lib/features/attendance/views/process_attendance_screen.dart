@@ -77,6 +77,7 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
                   ...absentList.map((e) => StudentCard(
                       studentName: e.name!,
                       studentID: e.studentId!,
+                      face: [],
                       present: false))
                 ],
               ),
@@ -259,6 +260,7 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
                       return StudentCard(
                           studentName: e.name!,
                           studentID: e.studentId!,
+                          face: e.face!,
                           present: true);
                     },
                   ),
@@ -277,11 +279,13 @@ class StudentCard extends StatelessWidget {
       {super.key,
       required this.studentName,
       required this.studentID,
-      required this.present});
+      required this.present,
+      required this.face});
 
   final String studentName;
   final int studentID;
   final bool present;
+  final List<int> face;
 
   @override
   Widget build(BuildContext context) {
@@ -304,17 +308,15 @@ class StudentCard extends StatelessWidget {
               style: TextStyle(color: UIConstants.colors.secondaryTextGrey),
             ),
             leading: Container(
-              width: 40,
-              height: 40,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: UIConstants.colors.primaryPurple),
-              child: Icon(
-                Icons.person_2_sharp,
-                color: UIConstants.colors.primaryWhite,
-              ),
-            ),
+                width: 40,
+                height: 40,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: UIConstants.colors.primaryPurple),
+                child: face.isEmpty
+                    ? Icon(Icons.person)
+                    : Image.memory(Uint8List.fromList(face))),
             trailing: Icon(present ? Icons.check_circle_outline : Icons.error,
                 color: present ? Colors.green : Colors.red, size: 30),
           ),

@@ -59,6 +59,10 @@ def process_attendance_from_image(img_path: str, students: list[schemas.Student]
             continue
 
         end = time.time()
+        
+        
+        min_match_student.face = list(face.tobytes())
+        print(type(face.tobytes()))
         present_students.append(min_match_student)
         print('Recognised Student: {recognised_student} ({ID})'.format(recognised_student = min_match_student.name, ID=min_match_student.student_id))
         print('Euclidean distance: {dst}'.format(dst=min))

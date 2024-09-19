@@ -136,7 +136,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                               style: TextStyle(color: Colors.red));
                         },
                         stream:
-                            'http://192.168.0.102:8080/video', //'http://192.168.1.37:8081',
+                            'http://192.168.0.105:8080/video', //'http://192.168.1.37:8081',
                       ),
               ),
               const SizedBox(
