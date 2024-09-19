@@ -1,15 +1,18 @@
 import 'package:face_recognition_attendance/features/admin/views/student_management_screen.dart';
 import 'package:face_recognition_attendance/features/attendance/views/attendance_screen.dart';
 import 'package:face_recognition_attendance/features/attendance_management/views/attendance_management_screen.dart';
+import 'package:face_recognition_attendance/features/authentication/views/sign_in_screen.dart';
 import 'package:face_recognition_attendance/features/course_management/views/course_management_screen.dart';
 
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:sidebarx/sidebarx.dart';
 
 class AdminSidebarScreen extends StatefulWidget {
-  const AdminSidebarScreen({super.key});
+  const AdminSidebarScreen({super.key, required this.name});
+  final String name;
 
   @override
   State<AdminSidebarScreen> createState() => _AdminSidebarScreenState();
@@ -38,9 +41,14 @@ class _AdminSidebarScreenState extends State<AdminSidebarScreen> {
             footerBuilder: (ctx, child) {
               return ListTile(
                 trailing: const Icon(Icons.logout),
-                title: (_controller.extended) ? const Text('Professor') : null,
-                onTap: () {
-                  Navigator.pop(context);
+                title: (_controller.extended) ? Text(widget.name) : null,
+                onTap: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  prefs.clear();
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (context) => const SignInScreen()),
+                      (Route<dynamic> route) => false);
                 },
               );
             },

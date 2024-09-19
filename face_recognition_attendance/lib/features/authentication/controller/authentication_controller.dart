@@ -19,6 +19,7 @@ class AuthenticationController {
       );
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt('user_id', response['id']);
+      prefs.setString('name', response['name']);
     } catch (error) {
       print('In controller error');
       return Future.error((error as Map)['detail']);
@@ -39,6 +40,7 @@ class AuthenticationController {
       );
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt('user_id', response['id']);
+      prefs.setString('name', response['name']);
     } catch (error) {
       print('In controller error');
       return Future.error((error as Map)['detail']);

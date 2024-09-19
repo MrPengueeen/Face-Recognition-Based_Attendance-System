@@ -6,6 +6,7 @@ import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -184,14 +185,20 @@ class _SignInScreenState extends State<SignInScreen> {
         if (isAdmin) {
           await controller.loginAsAdmin(
               _emailCont.text, _passCont.text, 'admin');
+          final prefs = await SharedPreferences.getInstance();
+          var name = prefs.getString('name');
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                  builder: (context) => const AdminSidebarScreen()),
+                  builder: (context) => AdminSidebarScreen(name: name!)),
               (Route<dynamic> route) => false);
         } else {
           await controller.login(_emailCont.text, _passCont.text, 'teacher');
+          final prefs = await SharedPreferences.getInstance();
+          var name = prefs.getString('name');
+
           Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const SidebarScreen()),
+              MaterialPageRoute(
+                  builder: (context) => SidebarScreen(name: name!)),
               (Route<dynamic> route) => false);
         }
 

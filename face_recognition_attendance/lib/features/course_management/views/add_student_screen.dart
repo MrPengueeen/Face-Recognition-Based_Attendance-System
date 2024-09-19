@@ -8,6 +8,7 @@ import 'package:face_recognition_attendance/features/dashboard/views/sidebar_scr
 
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddStudentToCourseScreen extends StatefulWidget {
   const AddStudentToCourseScreen({super.key, required this.course});
@@ -122,9 +123,13 @@ class _AddStudentToCourseScreenState extends State<AddStudentToCourseScreen> {
                   final controller = CourseManagementController();
                   await controller.addStudentsToCourse(
                       widget.course, selectedStudents);
+                  final prefs = await SharedPreferences.getInstance();
+                  var name = prefs.getString('name');
                   Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
-                        builder: (context) => const SidebarScreen(),
+                        builder: (context) => SidebarScreen(
+                          name: name!,
+                        ),
                       ),
                       (Route<dynamic> route) => false);
 
