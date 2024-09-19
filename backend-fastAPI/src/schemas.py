@@ -56,7 +56,7 @@ class Student(StudentBase):
         return self.id == other.id
 
 class StudentAttendance(Student):
-    face: list[int]
+    face: str
 
 # Course Schema
 class CourseBase(BaseModel):

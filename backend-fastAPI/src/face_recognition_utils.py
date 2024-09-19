@@ -6,6 +6,7 @@ import schemas
 import time
 import numpy as np
 import json
+import base64
 
 
 def generate_face_embedding(path):
@@ -61,8 +62,9 @@ def process_attendance_from_image(img_path: str, students: list[schemas.Student]
         end = time.time()
         
         
-        min_match_student.face = list(face.tobytes())
-        print(type(face.tobytes()))
+        with open("temp.jpg", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        min_match_student.face = encoded_string
         present_students.append(min_match_student)
         print('Recognised Student: {recognised_student} ({ID})'.format(recognised_student = min_match_student.name, ID=min_match_student.student_id))
         print('Euclidean distance: {dst}'.format(dst=min))

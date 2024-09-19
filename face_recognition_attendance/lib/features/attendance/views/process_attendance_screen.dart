@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:face_recognition_attendance/features/attendance/controller/attendance_controller.dart';
@@ -77,7 +78,7 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
                   ...absentList.map((e) => StudentCard(
                       studentName: e.name!,
                       studentID: e.studentId!,
-                      face: [],
+                      face: '',
                       present: false))
                 ],
               ),
@@ -285,7 +286,7 @@ class StudentCard extends StatelessWidget {
   final String studentName;
   final int studentID;
   final bool present;
-  final List<int> face;
+  final String face;
 
   @override
   Widget build(BuildContext context) {
@@ -316,7 +317,7 @@ class StudentCard extends StatelessWidget {
                     color: UIConstants.colors.primaryPurple),
                 child: face.isEmpty
                     ? Icon(Icons.person)
-                    : Image.memory(Uint8List.fromList(face))),
+                    : Image.memory(base64Decode(face))),
             trailing: Icon(present ? Icons.check_circle_outline : Icons.error,
                 color: present ? Colors.green : Colors.red, size: 30),
           ),

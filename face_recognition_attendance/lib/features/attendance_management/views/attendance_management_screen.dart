@@ -96,8 +96,7 @@ class _AttendanceManagementScreenState
         selectedCourse = courses[0];
         attendance =
             await controller.getAttendanceByDate(selectedCourse, selectedDate);
-      }
-      {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             backgroundColor: UIConstants.colors.primaryRed,
             duration: const Duration(seconds: 4),
