@@ -97,6 +97,16 @@ class _AttendanceManagementScreenState
         attendance =
             await controller.getAttendanceByDate(selectedCourse, selectedDate);
       }
+      {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: UIConstants.colors.primaryRed,
+            duration: const Duration(seconds: 4),
+            content: Text(
+              'No courses found. Please add a course to your account.',
+              style: TextStyle(
+                  fontSize: 20, color: UIConstants.colors.primaryWhite),
+            )));
+      }
 
       isCoursesLoading = false;
 
