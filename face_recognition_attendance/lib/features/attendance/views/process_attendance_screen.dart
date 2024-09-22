@@ -13,7 +13,7 @@ class ProcessAttendanceScreen extends StatefulWidget {
       {super.key, required this.course, required this.capturedImage});
 
   final CourseModel course;
-  final List<int> capturedImage;
+  final Uint8List capturedImage;
 
   @override
   State<ProcessAttendanceScreen> createState() =>
@@ -29,6 +29,7 @@ class _ProcessAttendanceScreenState extends State<ProcessAttendanceScreen> {
   @override
   void initState() {
     super.initState();
+
     _processAttendance();
   }
 

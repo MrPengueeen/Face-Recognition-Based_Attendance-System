@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:face_recognition_attendance/features/attendance/models/attendance_model.dart';
@@ -13,7 +14,7 @@ class AdminController {
   final HTTPUtil httpUtil = HTTPUtil();
 
   Future addNewStudent(
-      String name, int studentId, String session, List<int> image) async {
+      String name, int studentId, String session, Uint8List image) async {
     Map<String, dynamic> queryParameters = {
       'student_id': studentId.toString(),
       'name': name,

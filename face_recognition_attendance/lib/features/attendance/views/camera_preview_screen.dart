@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:face_recognition_attendance/features/attendance/models/course_model.dart';
 import 'package:face_recognition_attendance/features/attendance/views/process_attendance_screen.dart';
+import 'package:face_recognition_attendance/services/constants/app_constants.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,9 @@ import 'package:flutter_mjpeg/flutter_mjpeg.dart';
 
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 class CameraPreviewScreen extends StatefulWidget {
   const CameraPreviewScreen({super.key, required this.course});
@@ -23,17 +27,52 @@ class CameraPreviewScreen extends StatefulWidget {
 
 class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
   bool captured = false;
-  List<int> capturedFrame = [];
+  Uint8List? capturedFrame = Uint8List(0);
   late CaptureMjpegPreprocessor _capturePreProcessor;
+
+  late final player = Player();
+
+  late final controller = VideoController(player);
 
   @override
   void initState() {
     super.initState();
-    _capturePreProcessor = CaptureMjpegPreprocessor(onFrameCaptured: (frame) {
-      setState(() {
-        capturedFrame = frame!;
-      });
+
+    Future.microtask(() async {
+      if (player.platform is NativePlayer) {
+        await (player.platform as dynamic).setProperty(
+          'seekable',
+          'no',
+        );
+      }
     });
+
+    player.stream.log.listen((event) {
+      print("log $event");
+    });
+    //  Future.microtask(() async {
+
+    //   if (player.platform is NativePlayer) {
+    //     await (player.platform as dynamic).setProperty(
+    //       'force-seekable',
+    //       'yes',
+    //     );
+    //   }
+
+    player.open(
+      Media(AppConstants.CAMERA_URL),
+    );
+    // _capturePreProcessor = CaptureMjpegPreprocessor(onFrameCaptured: (frame) {
+    //   setState(() {
+    //     capturedFrame = frame!;
+    //   });
+    // });
+  }
+
+  @override
+  void dispose() {
+    player.dispose();
+    super.dispose();
   }
 
   @override
@@ -121,23 +160,28 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: capturedFrame.isNotEmpty
+                child: capturedFrame!.isNotEmpty
                     ? Image.memory(
-                        Uint8List.fromList(capturedFrame),
+                        capturedFrame!,
                         fit: BoxFit.fitWidth,
                       )
-                    : Mjpeg(
-                        isLive: !captured,
-                        preprocessor: captured ? _capturePreProcessor : null,
-                        error: (context, error, stack) {
-                          print(error);
-                          print(stack);
-                          return Text(error.toString(),
-                              style: TextStyle(color: Colors.red));
-                        },
-                        stream:
-                            'http://192.168.0.105:8080/video', //'http://192.168.1.37:8081',
+                    : Video(
+                        controller: controller,
+                        controls: NoVideoControls,
                       ),
+
+                // Mjpeg(
+                //     isLive: !captured,
+                //     preprocessor: captured ? _capturePreProcessor : null,
+                //     error: (context, error, stack) {
+                //       print(error);
+                //       print(stack);
+                //       return Text(error.toString(),
+                //           style: TextStyle(color: Colors.red));
+                //     },
+                //     stream:
+                //         "rtsp://aonmoy:admin_admin!@192.168.0.105:554/Streaming/Channels/101/", //'http://192.168.1.37:8081',
+                //   ),
               ),
               const SizedBox(
                 height: 20,
@@ -151,6 +195,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                         onPressed: () {
                           setState(() {
                             captured = false;
+                            capturedFrame = Uint8List(0);
                           });
                         },
                         style: ElevatedButton.styleFrom(
@@ -178,7 +223,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                             MaterialPageRoute(
                                 builder: (ctx) => ProcessAttendanceScreen(
                                       course: widget.course,
-                                      capturedImage: capturedFrame,
+                                      capturedImage: capturedFrame!,
                                     )),
                           );
                         },
@@ -203,7 +248,8 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
               if (!captured)
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      capturedFrame = await player.screenshot();
                       setState(() {
                         captured = true;
                       });

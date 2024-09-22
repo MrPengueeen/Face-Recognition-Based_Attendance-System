@@ -4,10 +4,13 @@ import 'package:face_recognition_attendance/features/admin/controllers/admin_con
 import 'package:face_recognition_attendance/features/attendance/views/camera_preview_screen.dart';
 import 'package:face_recognition_attendance/features/attendance/views/utils/shared_widgets.dart';
 import 'package:face_recognition_attendance/features/authentication/utils/shared_widgets.dart';
+import 'package:face_recognition_attendance/services/constants/app_constants.dart';
 import 'package:face_recognition_attendance/ui_contants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mjpeg/flutter_mjpeg.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 class AddNewStudentWidget extends StatefulWidget {
   const AddNewStudentWidget({super.key, required this.sessionList});
@@ -20,9 +23,12 @@ class AddNewStudentWidget extends StatefulWidget {
 
 class _AddNewStudentWidgetState extends State<AddNewStudentWidget> {
   bool captured = false;
-  List<int> capturedFrame = [];
+  Uint8List? capturedFrame = Uint8List(0);
   late CaptureMjpegPreprocessor _capturePreProcessor;
 
+  late final player = Player();
+
+  late final controller = VideoController(player);
   final _nameCont = TextEditingController();
   final _idCont = TextEditingController();
   late String selectedSession;
@@ -33,11 +39,30 @@ class _AddNewStudentWidgetState extends State<AddNewStudentWidget> {
   @override
   void initState() {
     super.initState();
-    _capturePreProcessor = CaptureMjpegPreprocessor(onFrameCaptured: (frame) {
-      setState(() {
-        capturedFrame = frame!;
-      });
+    Future.microtask(() async {
+      if (player.platform is NativePlayer) {
+        await (player.platform as dynamic).setProperty(
+          'seekable',
+          'no',
+        );
+      }
     });
+
+    player.stream.log.listen((event) {
+      print("log $event");
+    });
+    //  Future.microtask(() async {
+
+    //   if (player.platform is NativePlayer) {
+    //     await (player.platform as dynamic).setProperty(
+    //       'force-seekable',
+    //       'yes',
+    //     );
+    //   }
+
+    player.open(
+      Media(AppConstants.CAMERA_URL),
+    );
     selectedSession = widget.sessionList.first;
   }
 
@@ -48,7 +73,7 @@ class _AddNewStudentWidgetState extends State<AddNewStudentWidget> {
         isLoading = true;
       });
       await controller.addNewStudent(_nameCont.text, int.parse(_idCont.text),
-          selectedSession, capturedFrame);
+          selectedSession, capturedFrame!);
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: UIConstants.colors.primaryRed,
@@ -157,25 +182,30 @@ class _AddNewStudentWidgetState extends State<AddNewStudentWidget> {
                       borderRadius: BorderRadius.circular(20),
                       color: UIConstants.colors.primaryTextBlack,
                     ),
-                    child: capturedFrame.isNotEmpty
+                    child: capturedFrame!.isNotEmpty
                         ? Image.memory(
-                            Uint8List.fromList(capturedFrame),
+                            capturedFrame!,
                             fit: BoxFit.fitWidth,
                           )
-                        : Mjpeg(
-                            fit: BoxFit.fill,
-                            isLive: !captured,
-                            preprocessor:
-                                captured ? _capturePreProcessor : null,
-                            error: (context, error, stack) {
-                              print(error);
-                              print(stack);
-                              return Text(error.toString(),
-                                  style: TextStyle(color: Colors.red));
-                            },
-                            stream:
-                                'http://192.168.0.105:8080/video', //'http://192.168.1.37:8081',
+                        : Video(
+                            controller: controller,
+                            controls: NoVideoControls,
                           ),
+
+                    //  Mjpeg(
+                    //     fit: BoxFit.fill,
+                    //     isLive: !captured,
+                    //     preprocessor:
+                    //         captured ? _capturePreProcessor : null,
+                    //     error: (context, error, stack) {
+                    //       print(error);
+                    //       print(stack);
+                    //       return Text(error.toString(),
+                    //           style: TextStyle(color: Colors.red));
+                    //     },
+                    //     stream:
+                    //         'rtsp://aonmoy:admin_admin@192.168.1.100:554/Streaming/Channels/101/', //'http://192.168.1.37:8081',
+                    //   ),
                   ),
                   const SizedBox(
                     height: 20,
@@ -196,7 +226,7 @@ class _AddNewStudentWidgetState extends State<AddNewStudentWidget> {
                             onPressed: () {
                               setState(() {
                                 captured = false;
-                                capturedFrame.clear();
+                                capturedFrame = Uint8List(0);
                               });
                             },
                             style: ElevatedButton.styleFrom(
@@ -260,7 +290,8 @@ class _AddNewStudentWidgetState extends State<AddNewStudentWidget> {
                   if (!captured && !isLoading)
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          capturedFrame = await player.screenshot();
                           setState(() {
                             captured = true;
                           });

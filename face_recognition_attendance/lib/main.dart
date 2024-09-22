@@ -1,7 +1,9 @@
 import 'package:face_recognition_attendance/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:media_kit/media_kit.dart';
 
 void main() {
+  MediaKit.ensureInitialized();
   runApp(const MyApp());
 }
 
