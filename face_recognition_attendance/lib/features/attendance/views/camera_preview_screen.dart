@@ -41,8 +41,8 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
     Future.microtask(() async {
       if (player.platform is NativePlayer) {
         await (player.platform as dynamic).setProperty(
-          'seekable',
-          'no',
+          'force-seekable',
+          'yes',
         );
       }
     });
